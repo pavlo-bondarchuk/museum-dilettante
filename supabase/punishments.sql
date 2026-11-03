@@ -216,7 +216,7 @@ begin
     left join public.game_guesses g on g.game_id = p.game_id and g.token = p.token and g.round = v_state.round
     where p.game_id = v_game.id;
     return jsonb_build_object('ok', true, 'snapshot', jsonb_build_object(
-      'code', v_code, 'status', v_state.status, 'round', v_state.round,
+      'code', v_code, 'deck_name', (select d.name from public.quiz_questions q join public.quiz_decks d on d.id = q.deck_id where q.id = v_game.question_ids[1]), 'status', v_state.status, 'round', v_state.round,
       'total', array_length(v_game.question_ids, 1), 'question', v_question.question,
       'unit', case when v_state.status in ('reveal','finished') then v_question.unit else null end,
       'correct', case when v_state.status in ('reveal','finished') then v_question.answer else null end,
