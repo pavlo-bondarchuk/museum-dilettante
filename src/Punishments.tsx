@@ -11,9 +11,9 @@ type Draft = Omit<Punishment,'id'> & { id?:number }
 const blank:Draft = {body:'',category:'Музейний абсурд',active:true,question_id:null}
 const categories=['Музейний абсурд','Акторські','Екскурсійні','Для колективу']
 const modes:{value:Mode;title:string;description:string}[]=[
- {value:'random',title:'Випадково',description:'Будь-яке активне покарання може повторюватися.'},
- {value:'no_repeat',title:'Без повторень',description:'Використані завдання не повторюються, поки не закінчаться всі активні.'},
- {value:'linked',title:'Прив’язка до запитання',description:'Спершу вибір з прив’язаних до поточного запитання, потім із загальних; якщо загальних немає — із всіх активних.'}
+ {value:'random',title:'Випадково',description:'Випадковий вибір серед ще не використаних вироків. Кожен вирок — максимум один раз за сеанс.'},
+ {value:'no_repeat',title:'Без повторень',description:'Без повторів у межах сеансу. Коли всі вироки вичерпано, новий не призначається.'},
+ {value:'linked',title:'Прив’язка до запитання',description:'Спершу невикористані вироки для цього запитання, потім загальні. Жодних повторів у сеансі.'}
 ]
 
 export default function Punishments(){
@@ -78,7 +78,7 @@ export default function Punishments(){
   {error&&<div className="admin-alert" role="alert">{error}<button onClick={()=>setError('')}><X size={18}/></button></div>}
   {notice&&<div className="admin-notice">{notice}<button onClick={()=>setNotice('')}><X size={18}/></button></div>}
   <section className="admin-card penalty-settings">
-   <div className="penalty-header"><div><h2>Режим покарань</h2><p>Це налаштування запам’ятовується при створенні нової ігрової кімнати. Уже запущені ігри не зміняться.</p></div></div>
+   <div className="penalty-header"><div><h2>Режим покарань</h2><p>Кожен вирок може з’явитися лише один раз за ігровий сеанс у будь-якому режимі. Налаштування режиму фіксується при створенні кімнати.</p></div></div>
    <div className="penalty-modes">{modes.map(item=><label className={'penalty-mode'+(mode===item.value?' selected':'')} key={item.value}><input type="radio" name="punishment-mode" checked={mode===item.value} onChange={()=>setMode(item.value)}/><span><strong>{item.value==='random'?<Shuffle size={17} className="ui-icon"/>:item.value==='no_repeat'?<Repeat2 size={17} className="ui-icon"/>:<Link2 size={17} className="ui-icon"/>} {item.title}</strong><small>{item.description}</small></span></label>)}</div>
    <button className="admin-button accent" onClick={()=>void saveMode()} disabled={working||mode===savedMode}><Save size={15} className="ui-icon"/> Зберегти режим</button>
   </section>
