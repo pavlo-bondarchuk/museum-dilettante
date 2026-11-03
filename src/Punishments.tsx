@@ -1,3 +1,4 @@
+import { X, Plus, Pencil, Ban, Shuffle, Repeat2, Link2, Save } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { db } from './supabase'
 
@@ -74,23 +75,23 @@ export default function Punishments(){
   }catch(e){setError((e as Error).message)}finally{setWorking(false)}
  }
  return <>
-  {error&&<div className="admin-alert" role="alert">{error}<button onClick={()=>setError('')}>×</button></div>}
-  {notice&&<div className="admin-notice">{notice}<button onClick={()=>setNotice('')}>×</button></div>}
+  {error&&<div className="admin-alert" role="alert">{error}<button onClick={()=>setError('')}><X size={18}/></button></div>}
+  {notice&&<div className="admin-notice">{notice}<button onClick={()=>setNotice('')}><X size={18}/></button></div>}
   <section className="admin-card penalty-settings">
    <div className="penalty-header"><div><h2>Режим покарань</h2><p>Це налаштування запам’ятовується при створенні нової ігрової кімнати. Уже запущені ігри не зміняться.</p></div></div>
-   <div className="penalty-modes">{modes.map(item=><label className={'penalty-mode'+(mode===item.value?' selected':'')} key={item.value}><input type="radio" name="punishment-mode" checked={mode===item.value} onChange={()=>setMode(item.value)}/><span><strong>{item.title}</strong><small>{item.description}</small></span></label>)}</div>
-   <button className="admin-button accent" onClick={()=>void saveMode()} disabled={working||mode===savedMode}>Зберегти режим</button>
+   <div className="penalty-modes">{modes.map(item=><label className={'penalty-mode'+(mode===item.value?' selected':'')} key={item.value}><input type="radio" name="punishment-mode" checked={mode===item.value} onChange={()=>setMode(item.value)}/><span><strong>{item.value==='random'?<Shuffle size={17} className="ui-icon"/>:item.value==='no_repeat'?<Repeat2 size={17} className="ui-icon"/>:<Link2 size={17} className="ui-icon"/>} {item.title}</strong><small>{item.description}</small></span></label>)}</div>
+   <button className="admin-button accent" onClick={()=>void saveMode()} disabled={working||mode===savedMode}><Save size={15} className="ui-icon"/> Зберегти режим</button>
   </section>
   <section className="admin-card">
-   <div className="admin-list-bar"><input placeholder="Пошук за текстом чи категорією…" value={search} onChange={e=>setSearch(e.target.value)}/><button className="admin-button accent" onClick={()=>setEditing({...blank})}>+ Додати покарання</button></div>
+   <div className="admin-list-bar"><input placeholder="Пошук за текстом чи категорією…" value={search} onChange={e=>setSearch(e.target.value)}/><button className="admin-button accent" onClick={()=>setEditing({...blank})}><Plus size={16} className="ui-icon"/> Додати покарання</button></div>
    <div className="admin-summary"><div><strong>{items.length}</strong><span>Усього</span></div><div><strong>{items.filter(x=>x.active).length}</strong><span>Активних</span></div><div><strong>{items.filter(x=>x.question_id!==null).length}</strong><span>Прив'язаних</span></div></div>
-   <div className="admin-list">{filtered.map(p=><article key={p.id} className={'admin-question'+(!p.active?' inactive':'')}><div className="admin-question-text"><span className="admin-question-id">#{p.id} · {p.category} · {p.active?'Активне':'Вимкнене'}</span><h3>{p.body}</h3><p>{p.question_id===null?'Для будь-якого запитання':'Питання: '+questionText(p.question_id)}</p></div><div className="admin-question-actions"><button className="admin-button" onClick={()=>setEditing({...p})}>Редагувати</button><button className="admin-button danger" disabled={working} onClick={()=>void toggle(p)}>{p.active?'Вимкнути':'Увімкнути'}</button></div></article>)}{!filtered.length&&<p className="admin-empty">Покарань за цим пошуком немає.</p>}</div>
+   <div className="admin-list">{filtered.map(p=><article key={p.id} className={'admin-question'+(!p.active?' inactive':'')}><div className="admin-question-text"><span className="admin-question-id">#{p.id} · {p.category} · {p.active?'Активне':'Вимкнене'}</span><h3>{p.body}</h3><p>{p.question_id===null?'Для будь-якого запитання':'Питання: '+questionText(p.question_id)}</p></div><div className="admin-question-actions"><button className="admin-button" onClick={()=>setEditing({...p})}><Pencil size={15} className="ui-icon"/> Редагувати</button><button className="admin-button danger" disabled={working} onClick={()=>void toggle(p)}><Ban size={15} className="ui-icon"/>{p.active?'Вимкнути':'Увімкнути'}</button></div></article>)}{!filtered.length&&<p className="admin-empty">Покарань за цим пошуком немає.</p>}</div>
   </section>
-  {editing&&<div className="admin-overlay" role="presentation" onMouseDown={e=>{if(e.target===e.currentTarget)setEditing(null)}}><section className="admin-dialog" role="dialog" aria-modal="true" aria-label="Редактор покарання"><div className="admin-dialog-top"><h2>{editing.id?'Редагувати покарання':'Додати покарання'}</h2><button onClick={()=>setEditing(null)}>×</button></div>
+  {editing&&<div className="admin-overlay" role="presentation" onMouseDown={e=>{if(e.target===e.currentTarget)setEditing(null)}}><section className="admin-dialog" role="dialog" aria-modal="true" aria-label="Редактор покарання"><div className="admin-dialog-top"><h2>{editing.id?'Редагувати покарання':'Додати покарання'}</h2><button onClick={()=>setEditing(null)}><X size={18}/></button></div>
    <label>Текст завдання<textarea rows={4} value={editing.body} maxLength={500} onChange={e=>setEditing({...editing,body:e.target.value})}/></label>
    <div className="admin-form-grid"><label>Категорія<select value={editing.category} onChange={e=>setEditing({...editing,category:e.target.value})}>{[...new Set([...categories,...items.map(x=>x.category)])].map(c=><option key={c} value={c}>{c}</option>)}</select></label><label>Прив’язане запитання<select value={editing.question_id??''} onChange={e=>setEditing({...editing,question_id:e.target.value?Number(e.target.value):null})}><option value="">Загальне (без прив’язки)</option>{decks.map(d=><optgroup label={d.name} key={d.id}>{questions.filter(q=>q.deck_id===d.id).map(q=><option value={q.id} key={q.id}>#{q.id} — {q.question}</option>)}</optgroup>)}</select></label></div>
    <p className="penalty-help">За режиму «Прив’язка до запитання» спочатку вибираються пов’язані з ним покарання. Для решти запитань можна використовувати загальні.</p>
    <label className="admin-check"><input type="checkbox" checked={editing.active} onChange={e=>setEditing({...editing,active:e.target.checked})}/> Активне покарання</label>
-   <div className="admin-dialog-buttons"><button className="admin-button" onClick={()=>setEditing(null)}>Скасувати</button><button className="admin-button accent" disabled={working} onClick={()=>void saveItem()}>Зберегти</button></div></section></div>}
+   <div className="admin-dialog-buttons"><button className="admin-button" onClick={()=>setEditing(null)}>Скасувати</button><button className="admin-button accent" disabled={working} onClick={()=>void saveItem()}><Save size={15} className="ui-icon"/> Зберегти</button></div></section></div>}
  </>
 }
