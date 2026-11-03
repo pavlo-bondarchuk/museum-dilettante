@@ -80,11 +80,12 @@ export default function Admin() {
   }, [])
 
   useEffect(() => {
-    if (!session || !db) { setAllowed(false); return }
+    const client = db
+    if (!session || !client) { setAllowed(false); return }
     let cancelled = false
     const connect = async () => {
       try {
-        const { data, error: err } = await db.rpc('is_quiz_admin')
+        const { data, error: err } = await client.rpc('is_quiz_admin')
         if (err) throw err
         if (cancelled) return
         setAllowed(!!data)
