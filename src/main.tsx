@@ -83,17 +83,18 @@ function Join() {
   const navigate = useNavigate()
   const [code, setCode] = useState(pathCode || '')
   const [name, setName] = useState(localStorage.getItem('md-name') || '')
-  const [joined, setJoined] = useState(false)
+  const [joined, setJoined] = useState(() => !!pathCode && localStorage.getItem('md-joined-code') === pathCode.toUpperCase())
   const [value, setValue] = useState('')
   const [notice, setNotice] = useState('')
   const [pending, setPending] = useState(false)
   const playerToken = token('md-player-token')
   const { snap, error, refresh } = useLive(joined ? code.toUpperCase() : undefined, { player_token: playerToken })
   const me = snap?.players.find(p => p.mine)
+  useEffect(() => { setValue('') }, [snap?.round])
   useEffect(() => { if (pathCode) setCode(pathCode.toUpperCase()) }, [pathCode])
   async function join() {
     setPending(true); setNotice('')
-    try { await call('join', { code: code.trim().toUpperCase(), name: name.trim(), player_token: playerToken }); localStorage.setItem('md-name', name.trim()); setJoined(true); navigate('/join/' + code.trim().toUpperCase(), { replace: true }) }
+    try { await call('join', { code: code.trim().toUpperCase(), name: name.trim(), player_token: playerToken }); localStorage.setItem('md-name', name.trim()); localStorage.setItem('md-joined-code', code.trim().toUpperCase()); setJoined(true); navigate('/join/' + code.trim().toUpperCase(), { replace: true }) }
     catch (e) { setNotice((e as Error).message) }
     finally { setPending(false) }
   }
