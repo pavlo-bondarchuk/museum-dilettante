@@ -50,7 +50,7 @@ create policy "Admin update decks" on public.quiz_decks for update to authentica
 create policy "Admin delete decks" on public.quiz_decks for delete to authenticated using ((select public.is_quiz_admin()));
 
 grant select, insert, update, delete on public.quiz_questions, public.quiz_decks to authenticated;
-grant usage, select on all sequences in schema public to authenticated;
+grant usage, select on sequence public.quiz_questions_id_seq, public.quiz_decks_id_seq to authenticated;
 
 create or replace function public.list_public_decks()
 returns table(id bigint,name text,question_count bigint)
