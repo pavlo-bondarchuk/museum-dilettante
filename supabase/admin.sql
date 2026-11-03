@@ -224,7 +224,7 @@ begin
       'total', array_length(v_game.question_ids, 1), 'question', v_question.question,
       'unit', case when v_state.status in ('reveal','finished') then v_question.unit else null end,
       'correct', case when v_state.status in ('reveal','finished') then v_question.answer else null end,
-      'answered', v_answered, 'players', v_players,
+      'explanation', case when v_state.status in ('reveal','finished') then v_question.explanation else null end, 'answered', v_answered, 'players', v_players,
       'loser', (select p.name from public.game_players p where p.game_id = v_game.id and p.token = v_penalty.loser),
       'punishment', v_penalty.punishment
     ));
