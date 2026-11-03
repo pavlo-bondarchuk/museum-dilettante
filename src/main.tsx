@@ -2,12 +2,9 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Link, Route, Routes, useNavigate, useParams } from 'react-router-dom'
 import { QRCodeSVG } from 'qrcode.react'
-import { createClient } from '@supabase/supabase-js'
+import { db } from './supabase'
+import Admin from './Admin'
 import './style.css'
-
-const url = import.meta.env.VITE_SUPABASE_URL
-const key = import.meta.env.VITE_SUPABASE_ANON_KEY
-const db = url && key ? createClient(url, key) : null
 
 type Player = { name: string; value?: number; error?: number; points: number; penalties: number; answered: boolean; mine?: boolean; id: string }
 type Snapshot = { code: string; status: 'lobby'|'answer'|'reveal'|'finished'; round: number; total: number; question: string|null; correct: number|null; unit: string|null; answered: number; players: Player[]; punishment: string|null; loser: string|null }
@@ -32,7 +29,7 @@ function Shell({ children }: { children: React.ReactNode }) {
 }
 
 function Home() {
-  return <Shell><section className="hero"><span className="kicker">Гра, де приблизно — вже непогано</span><h1>А наскільки<br/><em>ви помиляєтесь?</em></h1><p>Вгадуйте числа з історії музею. Перемагає той, хто найближче. Хто найдалі — отримує музейний вирок.</p><div className="actions"><Link className="btn primary" to="/host">Я ведучий →</Link><Link className="btn outline" to="/join">Приєднатися до гри</Link></div></section></Shell>
+  return <Shell><section className="hero"><span className="kicker">Гра, де приблизно — вже непогано</span><h1>А наскільки<br/><em>ви помиляєтесь?</em></h1><p>Вгадуйте числа з історії музею. Перемагає той, хто найближче. Хто найдалі — отримує музейний вирок.</p><div className="actions"><Link className="btn primary" to="/host">Я ведучий →</Link><Link className="btn outline" to="/join">Приєднатися до гри</Link><Link className="btn outline" to="/admin">Банк запитань</Link></div></section></Shell>
 }
 
 function useLive(code: string | undefined, identity: Record<string, unknown>) {
@@ -57,20 +54,22 @@ function useLive(code: string | undefined, identity: Record<string, unknown>) {
 }
 
 function Host() {
-  const navigate = useNavigate()
   const [code, setCode] = useState(localStorage.getItem('md-host-code') || '')
+  const [decks, setDecks] = useState<{id:number,name:string,question_count:number}[]>([])
+  const [deckId, setDeckId] = useState<number|null>(null)
+  useEffect(() => { void db?.rpc('list_public_decks').then(({data}) => { if (data) { setDecks(data); setDeckId(old => old || data[0]?.id || null) } }) }, [])
   const secret = token('md-host-secret')
   const { snap, error, refresh } = useLive(code, { host_secret: secret })
   const [working, setWorking] = useState(false)
   const [notice, setNotice] = useState('')
   async function act(action: string) {
     setWorking(true); setNotice('')
-    try { const res = await call(action, { code, host_secret: secret }); if (res.code) { localStorage.setItem('md-host-code', res.code); setCode(res.code) }; await refresh() }
+    try { const res = await call(action, { code, host_secret: secret, deck_id: action === 'create' ? deckId : undefined }); if (res.code) { localStorage.setItem('md-host-code', res.code); setCode(res.code) }; await refresh() }
     catch (e) { setNotice((e as Error).message) }
     finally { setWorking(false) }
   }
   const link = code ? window.location.origin + '/join/' + code : ''
-  return <Shell><div className="top"><span className="kicker">Пульт ведучого</span><Link to="/">← На головну</Link></div>{!code ? <section className="panel center"><h1>Створити гру</h1><p>Одна кімната, одна QR-адреса, до 40 учасників.</p><button className="btn primary" disabled={working} onClick={() => void act('create')}>Створити кімнату</button></section> : <>
+  return <Shell><div className="top"><span className="kicker">Пульт ведучого</span><Link to="/">← На головну</Link></div>{!code ? <section className="panel center"><h1>Створити гру</h1><p>Одна кімната, одна QR-адреса, до 40 учасників.</p><label>Колода<select value={deckId ?? ""} onChange={e=>setDeckId(Number(e.target.value))}>{decks.map(d=><option key={d.id} value={d.id}>{d.name} · {d.question_count} запитань</option>)}</select></label><button className="btn primary" disabled={working || !deckId} onClick={() => void act('create')}>Створити кімнату</button></section> : <>
     <div className="host-grid"><section className="panel"><span className="kicker">Кімната</span><h1 className="room-code">{code}</h1><div className="qr">{link && <QRCodeSVG value={link} size={176} bgColor="#ffffff" fgColor="#171b25" marginSize={2}/>}</div><a href={link} target="_blank" rel="noreferrer">{link}</a><div className="actions"><Link className="btn outline" to={'/screen/' + code} target="_blank">Відкрити екран проектора ↗</Link><button className="btn subtle" onClick={() => void navigator.clipboard.writeText(link)}>Скопіювати посилання</button></div></section>
     <section className="panel"><span className="kicker">{snap ? 'Раунд ' + (snap.round + 1) + ' / ' + snap.total : 'Очікування'}</span><h2>{snap?.question || 'Збираємо учасників'}</h2><p>Підключено: <b>{snap?.players.length || 0}</b> · Відповіло: <b>{snap?.answered || 0}</b></p><p>Стан: <b>{snap?.status || 'завантаження'}</b></p>{snap?.status === 'reveal' && <div className="result"><div>Правильна відповідь: <strong>{snap.correct} {snap.unit}</strong></div><div>Музейний вирок: <strong>{snap.loser || 'Немає'}</strong></div><p>{snap.punishment}</p></div>}
     <div className="actions">{snap?.status === 'lobby' && <button className="btn primary" disabled={working || !snap.players.length} onClick={() => void act('start')}>Почати гру</button>}{snap?.status === 'answer' && <button className="btn primary" disabled={working} onClick={() => void act('reveal')}>Закрити відповіді й показати результат</button>}{snap?.status === 'reveal' && <button className="btn primary" disabled={working} onClick={() => void act('next')}>Наступне питання →</button>}{snap?.status === 'finished' && <p>Гру завершено. Дякуємо за участь!</p>}</div></section></div>
@@ -117,6 +116,7 @@ function App() {
   return <Routes>
     <Route path="/" element={<Home/>}/>
     <Route path="/host" element={<Host/>}/>
+    <Route path="/admin" element={<Admin/>}/>
     <Route path="/join" element={<Join/>}/>
     <Route path="/join/:code" element={<Join/>}/>
     <Route path="/screen/:code" element={<Screen/>}/>
