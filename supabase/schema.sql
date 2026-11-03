@@ -197,7 +197,7 @@ begin
     select count(*) into v_answered from public.game_guesses where game_id = v_game.id and round = v_state.round;
     select * into v_penalty from public.game_penalties where game_id = v_game.id and round = v_state.round;
     select coalesce(jsonb_agg(jsonb_build_object(
-      'id', p.token::text, 'name', p.name, 'points', p.points, 'penalties', p.penalties,
+      'id', md5(p.token::text), 'mine', case when p_data->>'player_token' = p.token::text then true else false end, 'name', p.name, 'points', p.points, 'penalties', p.penalties,
       'answered', g.token is not null,
       'value', case when v_state.status in ('reveal','finished') then g.value else null end,
       'error', case when v_state.status in ('reveal','finished') then abs(g.value - v_question.answer) else null end
@@ -235,7 +235,7 @@ insert into public.quiz_questions (question, answer, unit) values
 ('У якому році Маразлі придбав палац?', 1888, 'рік'),
 ('Скільки людей могли йти підземною галереєю поруч?', 2, 'людини'),
 ('Скільки секунд, за газетним описом 1895 року, залишалося йти до виходу з галереї?', 30, 'секунд'),
-('У якому році відреставрували овальну клумбу, засадивши її самшитом?', 1988, 'рік'),
+('У якому році овальний газон засадили самшитом у вигляді орнаменту?', 1988, 'рік'),
 ('Скільки нових виставкових залів утворилося внаслідок перебудови лівої частини музею?', 3, 'зали');
 
 do $$ begin
