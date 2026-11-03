@@ -143,25 +143,37 @@ begin
         v_penalty_text := null;
         v_mode := coalesce(v_game.punishment_mode, 'random');
         if v_mode = 'linked' then
-          select id, body into v_penalty_id, v_penalty_text
-          from public.quiz_punishments
-          where active and question_id = v_question.id order by random() limit 1;
-          if v_penalty_id is null then
-            select id, body into v_penalty_id, v_penalty_text
-            from public.quiz_punishments
-            where active and question_id is null order by random() limit 1;
-          end if;
-        elsif v_mode = 'no_repeat' then
           select p.id, p.body into v_penalty_id, v_penalty_text
           from public.quiz_punishments p
-          where p.active and not exists (
-            select 1 from public.game_penalties gp
-            where gp.game_id = v_game.id and gp.punishment_id = p.id
-          ) order by random() limit 1;
+          where p.active and p.question_id = v_question.id
+            and not exists (
+              select 1 from public.game_penalties gp
+              where gp.game_id = v_game.id
+                and (gp.punishment_id = p.id or gp.punishment = p.body)
+            )
+          order by random() limit 1;
+          if v_penalty_id is null then
+            select p.id, p.body into v_penalty_id, v_penalty_text
+            from public.quiz_punishments p
+            where p.active and p.question_id is null
+              and not exists (
+                select 1 from public.game_penalties gp
+                where gp.game_id = v_game.id
+                  and (gp.punishment_id = p.id or gp.punishment = p.body)
+              )
+            order by random() limit 1;
+          end if;
         end if;
         if v_penalty_id is null then
-          select id, body into v_penalty_id, v_penalty_text
-          from public.quiz_punishments where active order by random() limit 1;
+          select p.id, p.body into v_penalty_id, v_penalty_text
+          from public.quiz_punishments p
+          where p.active
+            and not exists (
+              select 1 from public.game_penalties gp
+              where gp.game_id = v_game.id
+                and (gp.punishment_id = p.id or gp.punishment = p.body)
+            )
+          order by random() limit 1;
         end if;
         if v_penalty_id is not null then
           update public.game_players set penalties = penalties + 1
