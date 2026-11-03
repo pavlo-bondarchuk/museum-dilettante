@@ -11,3 +11,12 @@
 .host-deck-select option{background:#232733;color:#f4efe4}
 .host-select-icon{pointer-events:none;position:absolute;right:17px;top:50%;transform:translateY(-50%);color:#d8b77a}
 @media(max-width:600px){.host-deck-field{max-width:100%}.host-deck-select{font-size:15px}}
+
+.player-session{width:min(100%,672px);margin:10px auto 0;display:flex;flex-direction:column;align-items:center;gap:18px}
+.player-identity{display:inline-flex;align-items:center;justify-content:center;gap:10px;max-width:100%;min-height:42px;padding:10px 18px;border:1px solid #545967;border-radius:999px;background:#252936;color:#e4c58c;font-size:14px;font-weight:650;letter-spacing:.055em;overflow-wrap:anywhere}
+.player-identity svg{flex:none}
+.player-game-panel{width:100%;max-width:none;margin:0}
+.player-room-label{display:block;color:#d8b77a;text-transform:uppercase;font-size:12px;font-weight:650;letter-spacing:.17em;line-height:1.5;margin-bottom:22px}
+.player-result-title{color:#d8b77a;text-transform:uppercase;font-size:13px;font-weight:650;letter-spacing:.16em;line-height:1.5;margin:0 0 18px}
+.player-game-panel h1{overflow-wrap:anywhere}
+@media(max-width:600px){.player-session{margin-top:4px;gap:14px}.player-identity{font-size:13px;padding:9px 14px}.player-game-panel{padding:26px 20px}.player-room-label{margin-bottom:18px}}
