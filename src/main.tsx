@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
-import { BrowserRouter, Link, useNavigate, useParams } from 'react-router-dom'
+import { BrowserRouter, Link, Route, Routes, useNavigate, useParams } from 'react-router-dom'
 import { QRCodeSVG } from 'qrcode.react'
 import { createClient } from '@supabase/supabase-js'
 import './style.css'
@@ -113,11 +113,14 @@ function Screen() {
 }
 
 function App() {
-  const path = window.location.pathname
-  if (path === '/host') return <Host/>
-  if (path.startsWith('/screen/')) return <Screen/>
-  if (path === '/join' || path.startsWith('/join/')) return <Join/>
-  return <Home/>
+  return <Routes>
+    <Route path="/" element={<Home/>}/>
+    <Route path="/host" element={<Host/>}/>
+    <Route path="/join" element={<Join/>}/>
+    <Route path="/join/:code" element={<Join/>}/>
+    <Route path="/screen/:code" element={<Screen/>}/>
+    <Route path="*" element={<Home/>}/>
+  </Routes>
 }
 
 createRoot(document.getElementById('root')!).render(<BrowserRouter><App/></BrowserRouter>)
