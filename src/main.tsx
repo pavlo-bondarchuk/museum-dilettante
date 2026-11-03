@@ -9,7 +9,7 @@ const url = import.meta.env.VITE_SUPABASE_URL
 const key = import.meta.env.VITE_SUPABASE_ANON_KEY
 const db = url && key ? createClient(url, key) : null
 
-type Player = { name: string; value?: number; error?: number; points: number; penalties: number; answered: boolean; id: string }
+type Player = { name: string; value?: number; error?: number; points: number; penalties: number; answered: boolean; mine?: boolean; id: string }
 type Snapshot = { code: string; status: 'lobby'|'answer'|'reveal'|'finished'; round: number; total: number; question: string|null; correct: number|null; unit: string|null; answered: number; players: Player[]; punishment: string|null; loser: string|null }
 type Result = { ok: boolean; message?: string; code?: string; snapshot?: Snapshot }
 
@@ -89,7 +89,7 @@ function Join() {
   const [pending, setPending] = useState(false)
   const playerToken = token('md-player-token')
   const { snap, error, refresh } = useLive(joined ? code.toUpperCase() : undefined, { player_token: playerToken })
-  const me = snap?.players.find(p => p.id === playerToken)
+  const me = snap?.players.find(p => p.mine)
   useEffect(() => { if (pathCode) setCode(pathCode.toUpperCase()) }, [pathCode])
   async function join() {
     setPending(true); setNotice('')
