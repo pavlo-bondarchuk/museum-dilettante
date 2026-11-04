@@ -26,7 +26,7 @@ const token = (key: string) => {
 }
 
 function Shell({ children, hostTheme, headerAction }: { children: React.ReactNode; hostTheme?: 'dark'|'light'; headerAction?: React.ReactNode }) {
-  return <div className={['shell',hostTheme ? 'host-theme-'+hostTheme : ''].filter(Boolean).join(' ')}><header><Link to="/" className="brand"><span className="brand-mark">М</span><span>МУЗЕЙНИЙ<br/><b>ДИЛЕТАНТ</b></span></Link><div className="shell-header-right"><span className="eyebrow">ОНХМ · Інтерактивна гра</span>{headerAction}</div></header><main>{children}</main><footer>Музейні історії. Непередбачувані цифри.</footer></div>
+  return <div className={['shell',hostTheme ? 'host-theme-'+hostTheme : ''].filter(Boolean).join(' ')}><header><Link to="/" className="brand brand-with-logo" aria-label="Музейний дилетант — на головну"><img className="onfam-logo" src="https://cdn.prod.website-files.com/65a126447c08c162c916fa2c/65b24c24460c29664e2a1755_ONFAM-Logo.svg" alt="Логотип Одеського національного художнього музею" decoding="async"/><span className="brand-divider" aria-hidden="true"></span><span className="brand-title">МУЗЕЙНИЙ<br/><b>ДИЛЕТАНТ</b></span></Link><div className="shell-header-right"><span className="eyebrow">ОНХМ · Інтерактивна гра</span>{headerAction}</div></header><main>{children}</main><footer>Музейні історії. Непередбачувані цифри.</footer></div>
 }
 
 function Home() {
