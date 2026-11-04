@@ -59,3 +59,12 @@ body[data-host-theme="light"]{background:#f5f2eb;color:#252836}
 .host-theme-light .host-theme-toggle svg{color:#815b2c}
 .host-theme-light footer{color:#64636b}
 @media(max-width:700px){.shell-header-right{gap:10px}.host-theme-toggle{padding:10px;min-width:42px}.host-theme-toggle span{display:none}}
+
+.brand-with-logo{display:inline-flex;align-items:center;gap:15px;min-width:0;max-width:100%}
+.onfam-logo{display:block;width:106px;max-width:24vw;height:52px;object-fit:contain;object-position:center;flex:none;filter:brightness(0) invert(1)}
+.brand-divider{width:1px;height:36px;flex:none;background:#5b5554}
+.brand-title{display:block;font-size:12px;letter-spacing:.16em;line-height:1.35;color:#f4efe4;white-space:nowrap}
+.host-theme-light .onfam-logo{filter:brightness(0)}
+.host-theme-light .brand-divider{background:#c8bbae}
+.host-theme-light .brand-title{color:#262b38}
+@media(max-width:540px){.brand-with-logo{gap:9px}.onfam-logo{width:76px;max-width:24vw;height:42px}.brand-divider{height:30px}.brand-title{font-size:10px;letter-spacing:.08em}}
