@@ -132,6 +132,21 @@ export default function Admin() {
     finally { setWorking(false) }
   }
 
+  async function signInGoogle() {
+    if (!db) return
+    setWorking(true);setError('');setNotice('')
+    try {
+      const {error:err}=await db.auth.signInWithOAuth({
+        provider:'google',
+        options:{redirectTo:window.location.origin+'/admin',scopes:'openid email profile'}
+      })
+      if(err)throw err
+    }catch(e){
+      setError('Не вдалося почати Google-вхід: '+(e as Error).message)
+      setWorking(false)
+    }
+  }
+
   async function signInPassword() {
     if (!db || !email.trim() || !password) return
     setWorking(true);setError('');setNotice('')
@@ -260,6 +275,9 @@ export default function Admin() {
       {!session ? <section className="admin-card admin-login">
         <h2>Вхід адміністратора</h2>
         <p>Вхід адміністратора: bonddesign85@gmail.com або підтверджена адреса @ofam.ua.</p>
+        <button className="admin-google-button" disabled={working} onClick={()=>void signInGoogle()}><span className="google-glyph" aria-hidden="true">G</span> Увійти через Google</button>
+        <p className="admin-login-help">Google-вхід не надсилає листи Supabase. Для нього потрібно один раз налаштувати Google OAuth у Supabase. Доступ отримають лише підтверджені адреси з дозволеного домену або головний адміністратор.</p>
+        <div className="admin-login-separator"><span>Інші способи входу</span></div>
         <div className="admin-login-methods">
           <button className={'admin-button icon-button'+(loginMethod==='password'?' accent':'')} onClick={()=>{setLoginMethod('password');setError('')}}><KeyRound size={16}/> За паролем</button>
           <button className={'admin-button icon-button'+(loginMethod==='email'?' accent':'')} onClick={()=>{setLoginMethod('email');setError('')}}><Mail size={16}/> Через пошту</button>
