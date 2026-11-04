@@ -36,3 +36,12 @@
 .admin-users-identity svg{flex:none;color:#d4ba8d}
 .admin-users-hint{font-size:13px;line-height:1.65;margin:26px 0 0}
 @media(max-width:680px){.admin-users-heading,.admin-users-field{flex-direction:column;align-items:stretch}.admin-users-row{flex-wrap:wrap}.admin-users-input{width:100%}}
+
+.admin-login-methods{display:flex;flex-wrap:wrap;gap:10px;margin:22px 0}
+.admin-login-methods .admin-button{display:inline-flex;align-items:center;justify-content:center;gap:9px}
+.admin-login-help{font-size:13px;line-height:1.6;margin-top:16px}
+.admin-password-settings{margin-top:24px}
+.admin-password-form{max-width:580px;margin-top:14px}
+.admin-password-form h2{display:flex;align-items:center;gap:10px}
+.admin-password-form .admin-button{display:inline-flex;align-items:center;gap:9px}
+@media(max-width:500px){.admin-login-methods{display:grid;grid-template-columns:1fr 1fr}.admin-login-methods .admin-button{white-space:normal;padding:12px 8px}}
