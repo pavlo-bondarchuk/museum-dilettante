@@ -1,4 +1,4 @@
-import { X, Plus, Pencil, Ban, LogOut, BookOpen, ListChecks, Upload, Download, Save, UsersRound, KeyRound, Mail, ShieldCheck, LogIn } from 'lucide-react'
+import { X, Plus, Pencil, Ban, LogOut, BookOpen, ListChecks, Upload, Download, Save, UsersRound, LogIn } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import { Link } from 'react-router-dom'
@@ -39,11 +39,6 @@ function csvRows(text: string): string[][] {
   return rows
 }
 
-const isAllowedAdminEmail = (value: string) => {
-  const email = value.trim().toLowerCase()
-  return email === 'bonddesign85@gmail.com' || /^[^@\s]+@ofam\.ua$/.test(email)
-}
-
 const blank = (deck: number): Editor => ({
   question:'', answer:0, unit:'', deck_id:deck, explanation:'', difficulty:'medium', active:true
 })
@@ -54,15 +49,6 @@ export default function Admin() {
   const [ready, setReady] = useState(false)
   const [allowed, setAllowed] = useState(false)
   const [isOwner, setIsOwner] = useState(false)
-  const [email, setEmail] = useState('')
-  const [loginMethod,setLoginMethod] = useState<'password'|'email'>('password')
-  const [password,setPassword] = useState('')
-  const [newPassword,setNewPassword] = useState('')
-  const [confirmPassword,setConfirmPassword] = useState('')
-  const [passwordOpen,setPasswordOpen] = useState(false)
-  const [emailLimited,setEmailLimited] = useState(false)
-  const [sent, setSent] = useState(false)
-  const [token, setToken] = useState('')
   const [decks, setDecks] = useState<Deck[]>([])
   const [questions, setQuestions] = useState<Question[]>([])
   const [selected, setSelected] = useState(0)
@@ -74,7 +60,6 @@ export default function Admin() {
   const [working, setWorking] = useState(false)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
-  const validEmail = isAllowedAdminEmail(email)
 
   useEffect(() => {
     if (!db) { setError('Немає підключення до Supabase.'); setReady(true); return }
@@ -120,30 +105,6 @@ export default function Admin() {
   const deck = decks.find(d => d.id === selected)
   const active = questions.filter(q => q.deck_id === selected && q.active).length
 
-  function validateAdminEmail() {
-    if (validEmail) return true
-    setError('Дозволено лише bonddesign85@gmail.com або адресу з домену @ofam.ua.')
-    return false
-  }
-
-  async function sendLink() {
-    if (!db || !validateAdminEmail()) return
-    setWorking(true); setError(''); setNotice('')
-    try {
-      const { error: err } = await db.auth.signInWithOtp({ email:email.trim(), options: { emailRedirectTo: window.location.origin + '/admin' } })
-      if (err) throw err
-      setSent(true)
-      setNotice('Лист надіслано. Відкрийте посилання з пошти на цьому пристрої або введіть код, якщо він є в листі.')
-    } catch(e) {
-      const err=e as {message?:string;status?:number;code?:string}
-      if (err.status===429 || err.code==='over_email_send_rate_limit' || err.message?.toLowerCase().includes('email rate limit')) {
-        setEmailLimited(true)
-        setError('Ліміт листів Supabase на цю годину вичерпано. Якщо пароль уже встановлено — увійдіть із ним. Інакше потрібно дочекатися відновлення ліміту, а після входу встановити пароль.')
-      } else setError(err.message||'Не вдалося надіслати лист.')
-    }
-    finally { setWorking(false) }
-  }
-
   async function signInGoogle() {
     if (!db) return
     setWorking(true);setError('');setNotice('')
@@ -157,44 +118,6 @@ export default function Admin() {
       setError('Не вдалося почати Google-вхід: '+(e as Error).message)
       setWorking(false)
     }
-  }
-
-  async function signInPassword() {
-    if (!db || !validateAdminEmail() || !password) return
-    setWorking(true);setError('');setNotice('')
-    try {
-      const {error:err}=await db.auth.signInWithPassword({email:email.trim(),password})
-      if(err) throw err
-      setPassword('')
-    } catch(e) {
-      const err=e as {message?:string}
-      setError(err.message==='Invalid login credentials'?'Неправильний email або пароль. Якщо пароль ще не створювали, оберіть «Вхід через пошту».':err.message||'Не вдалося увійти.')
-    } finally {setWorking(false)}
-  }
-
-  async function setAdminPassword() {
-    if(!db) return
-    if(newPassword.length<12){setError('Пароль має містити щонайменше 12 символів.');return}
-    if(newPassword!==confirmPassword){setError('Паролі не збігаються.');return}
-    setWorking(true);setError('');setNotice('')
-    try {
-      const {error:err}=await db.auth.updateUser({password:newPassword})
-      if(err)throw err
-      setNewPassword('');setConfirmPassword('');setPasswordOpen(false)
-      setNotice('Пароль встановлено. Наступного разу можна входити без листа.')
-    }catch(e){setError((e as Error).message)}
-    finally {setWorking(false)}
-  }
-
-  async function verifyCode() {
-    if (!db || !validateAdminEmail()) return
-    setWorking(true); setError('')
-    try {
-      const { error: err } = await db.auth.verifyOtp({ email: email.trim(), token: token.trim(), type:'email' })
-      if (err) throw err
-      setNotice('Вхід підтверджено.')
-    } catch(e) { setError((e as Error).message) }
-    finally { setWorking(false) }
   }
 
   async function saveQuestion() {
@@ -286,35 +209,10 @@ export default function Admin() {
       {notice && <div className="admin-notice">{notice}<button onClick={()=>setNotice('')}><X size={18}/></button></div>}
       {!session ? <section className="admin-card admin-login">
         <h2>Вхід адміністратора</h2>
-        <p>Доступ дозволений виключно для bonddesign85@gmail.com та підтверджених облікових записів @ofam.ua.</p>
+        <p>Доступ дозволено лише для bonddesign85@gmail.com і підтверджених акаунтів @ofam.ua.</p>
         <button className="admin-google-button" disabled={working} onClick={()=>void signInGoogle()}><LogIn size={19} aria-hidden="true"/> Увійти через Google</button>
-        <p className="admin-login-help">Google-вхід не потребує листів Supabase. Увійдіть саме з головної адреси або корпоративної пошти @ofam.ua.</p>
-        <div className="admin-login-separator"><span>Інші способи входу</span></div>
-        <div className="admin-login-methods">
-          <button className={'admin-button icon-button'+(loginMethod==='password'?' accent':'')} onClick={()=>{setLoginMethod('password');setError('')}}><KeyRound size={16}/> За паролем</button>
-          <button className={'admin-button icon-button'+(loginMethod==='email'?' accent':'')} onClick={()=>{setLoginMethod('email');setError('')}}><Mail size={16}/> Через пошту</button>
-        </div>
-        <label>Електронна пошта<input type="email" autoComplete="username" value={email} onChange={e=>setEmail(e.target.value)} placeholder="email@example.com"/></label>
-        {loginMethod==='password' ? <>
-          <label>Пароль<input type="password" autoComplete="current-password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="Ваш пароль"/></label>
-          <button className="admin-button accent icon-button" disabled={working||!validEmail||!password} onClick={()=>void signInPassword()}><KeyRound size={16}/> Увійти</button>
-          <p className="admin-login-help">Якщо ви ще не встановили пароль, скористайтеся входом через пошту. Після підтвердження можна буде створити пароль.</p>
-        </> : <>
-          <button disabled={working || !validEmail || emailLimited} className="admin-button accent icon-button" onClick={()=>void sendLink()}><Mail size={16}/>{sent?'Надіслати ще раз':'Отримати посилання для входу'}</button>
-          {emailLimited && <p className="admin-login-help">Надсилання листів тимчасово обмежене на рівні Supabase. Ліміт спільний для всіх адміністраторів проєкту. Після його відновлення можна повторити спробу.</p>}
-          {sent && <div className="admin-code"><label>Код із листа (якщо є)<input value={token} onChange={e=>setToken(e.target.value)} inputMode="numeric" placeholder="6-значний код"/></label><button disabled={working || !token} className="admin-button" onClick={()=>void verifyCode()}>Підтвердити код</button></div>}
-        </>}
+        <p className="admin-login-help">Оберіть у Google головний або корпоративний обліковий запис музею.</p>
       </section> : !allowed ? <section className="admin-card"><h2>Доступ обмежено</h2><p>Доступ дозволено лише для bonddesign85@gmail.com та підтверджених адрес @ofam.ua. Увійдіть із відповідної пошти.</p></section> : <>
-      <section className="admin-password-settings">
-        <button className="admin-button icon-button" onClick={()=>{setPasswordOpen(!passwordOpen);setError('')}}><ShieldCheck size={16}/> {passwordOpen?'Закрити налаштування пароля':'Налаштувати пароль для входу'}</button>
-        {passwordOpen&&<div className="admin-card admin-password-form">
-          <h2>Пароль адміністратора</h2>
-          <p>Після встановлення пароля можна входити без листа Supabase. Це безкоштовно й не змінює права доступу.</p>
-          <label>Новий пароль (від 12 символів)<input type="password" autoComplete="new-password" value={newPassword} onChange={e=>setNewPassword(e.target.value)}/></label>
-          <label>Підтвердіть пароль<input type="password" autoComplete="new-password" value={confirmPassword} onChange={e=>setConfirmPassword(e.target.value)}/></label>
-          <button className="admin-button accent icon-button" disabled={working||newPassword.length<12||!confirmPassword} onClick={()=>void setAdminPassword()}><Save size={16}/> Зберегти пароль</button>
-        </div>}
-      </section>
       <div className="admin-tabs"><button className={tab==='questions'?'active':''} onClick={()=>setTab('questions')}><BookOpen size={16} className="ui-icon"/> Запитання</button><button className={tab==='punishments'?'active':''} onClick={()=>{setTab('punishments');setEditing(null);setNewDeck(false)}}><ListChecks size={16} className="ui-icon"/> Покарання</button>{isOwner && <button className={tab==='admins'?'active':''} onClick={()=>{setTab('admins');setEditing(null);setNewDeck(false)}}><UsersRound size={16} className="ui-icon"/> Доступи</button>}</div>
       {tab==='punishments' ? <Punishments/> : tab==='admins' && isOwner ? <AdminUsers/> : <>
       <section className="admin-toolbar"><div className="admin-field"><label>Колода<select value={selected} onChange={e=>{setSelected(Number(e.target.value));setEditing(null)}}>{decks.map(d=><option key={d.id} value={d.id}>{d.name}</option>)}</select></label></div><button className="admin-button" onClick={()=>setNewDeck(true)}><Plus size={16} className="ui-icon"/> Нова колода</button><button className="admin-button accent" onClick={()=>setEditing(blank(selected))} disabled={!selected}><Plus size={16} className="ui-icon"/> Запитання</button></section>
