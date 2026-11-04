@@ -1,4 +1,4 @@
-import { X, Plus, Pencil, Ban, LogOut, BookOpen, ListChecks, Upload, Download, Save, UsersRound, KeyRound, Mail, ShieldCheck } from 'lucide-react'
+import { X, Plus, Pencil, Ban, LogOut, BookOpen, ListChecks, Upload, Download, Save, UsersRound, KeyRound, Mail, ShieldCheck, LogIn } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import { Link } from 'react-router-dom'
@@ -275,7 +275,7 @@ export default function Admin() {
       {!session ? <section className="admin-card admin-login">
         <h2>Вхід адміністратора</h2>
         <p>Вхід адміністратора: bonddesign85@gmail.com або підтверджена адреса @ofam.ua.</p>
-        <button className="admin-google-button" disabled={working} onClick={()=>void signInGoogle()}><span className="google-glyph" aria-hidden="true">G</span> Увійти через Google</button>
+        <button className="admin-google-button" disabled={working} onClick={()=>void signInGoogle()}><LogIn size={19} aria-hidden="true"/> Увійти через Google</button>
         <p className="admin-login-help">Google-вхід не надсилає листи Supabase. Для нього потрібно один раз налаштувати Google OAuth у Supabase. Доступ отримають лише підтверджені адреси з дозволеного домену або головний адміністратор.</p>
         <div className="admin-login-separator"><span>Інші способи входу</span></div>
         <div className="admin-login-methods">
