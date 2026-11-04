@@ -68,3 +68,55 @@ body[data-host-theme="light"]{background:#f5f2eb;color:#252836}
 .host-theme-light .brand-divider{background:#c8bbae}
 .host-theme-light .brand-title{color:#262b38}
 @media(max-width:540px){.brand-with-logo{gap:9px}.onfam-logo{width:76px;max-width:24vw;height:42px}.brand-divider{height:30px}.brand-title{font-size:10px;letter-spacing:.08em}}
+
+html[data-theme="light"]{background:#f6f3ec;color:#272c36;color-scheme:light}
+html[data-theme="dark"]{background:#171b25;color:#f4efe4;color-scheme:dark}
+html[data-theme="light"] body{background:#f6f3ec;color:#272c36}
+html[data-theme="dark"] body{background:#171b25;color:#f4efe4}
+html[data-theme="light"] .shell{background:#f6f3ec;color:#272c36}
+html[data-theme="light"] .shell header,html[data-theme="light"] .shell footer{border-color:#d8d1c7}
+html[data-theme="light"] .brand{color:#232936}
+html[data-theme="light"] .brand-title{color:#232936}
+html[data-theme="light"] .brand-divider{background:#c8bbae}
+html[data-theme="light"] .onfam-logo{filter:brightness(0)}
+html[data-theme="light"] .eyebrow,html[data-theme="light"] .kicker,html[data-theme="light"] .round-label,html[data-theme="light"] .player-deck-title,html[data-theme="light"] .player-room-label,html[data-theme="light"] .player-result-title{color:#815b28}
+html[data-theme="light"] .shell footer{color:#656976}
+html[data-theme="light"] .shell .panel{background:#fffefa;color:#242936;border-color:#d5cec3;box-shadow:0 6px 24px rgba(30,33,40,.045)}
+html[data-theme="light"] .shell .panel h1,html[data-theme="light"] .shell .panel h2{color:#242936}
+html[data-theme="light"] .shell .panel p,html[data-theme="light"] .hero p{color:#515563}
+html[data-theme="light"] .hero em{color:#966b36}
+html[data-theme="light"] .shell a:not(.btn):not(.brand){color:#795323}
+html[data-theme="light"] .shell label,html[data-theme="light"] .host-deck-label{color:#815b28}
+html[data-theme="light"] .shell input,html[data-theme="light"] .shell .host-deck-select{background:#fffefa;color:#252a34;border-color:#a8a29a}
+html[data-theme="light"] .shell input:focus-visible,html[data-theme="light"] .shell .host-deck-select:focus-visible{outline:3px solid rgba(160,115,55,.3);border-color:#97713c}
+html[data-theme="light"] .shell .host-deck-select option{background:#fffefa;color:#252a34}
+html[data-theme="light"] .shell .host-select-icon{color:#876232}
+html[data-theme="light"] .shell .btn.primary{background:#ba9256;color:#212733}
+html[data-theme="light"] .shell .btn.outline{background:#fffefa;color:#30353f;border-color:#a58b63}
+html[data-theme="light"] .shell .btn.subtle{background:#eae7df;color:#30353f;border-color:#c7c1b7}
+html[data-theme="light"] .shell .person,html[data-theme="light"] .shell .result{background:#edeae4;color:#2a2e39}
+html[data-theme="light"] .shell .person small,html[data-theme="light"] .shell .result strong{color:#7c5425}
+html[data-theme="light"] .shell .error{background:#f6dfe2;color:#762a3b}
+html[data-theme="light"] .shell .player-identity{background:#fffefa;color:#775421;border-color:#c9bda9}
+html[data-theme="light"] .shell .success{color:#216948!important}
+html[data-theme="light"] .host-theme-toggle{background:#fffefa;color:#252a35;border-color:#bcb3a7}
+html[data-theme="light"] .host-theme-toggle:hover{background:#e9e1d5;border-color:#936e39}
+html[data-theme="light"] .host-theme-toggle svg{color:#815a28}
+html[data-theme="light"] .screen{background:radial-gradient(ellipse at top,#fffaf0,#ece7df 80%);color:#242937}
+html[data-theme="light"] .screen-top,html[data-theme="light"] .screen-foot,html[data-theme="light"] .screen .kicker{color:#755322}
+html[data-theme="light"] .screen p{color:#4e5361}
+html[data-theme="light"] .screen h1,html[data-theme="light"] .screen h2{color:#242937}
+html[data-theme="light"] .big-answer{color:#8c622d}
+html[data-theme="light"] .score-row{border-color:#d4cabc;color:#29303a}
+html[data-theme="light"] .verdict{background:#aa4251;color:#fff9f4}
+html[data-theme="light"] .verdict h2{color:#fff9f4}
+html[data-theme="light"] .verdict span{color:#fff5ee}
+html[data-theme="light"] .screen .screen-qr{background:#fff}
+.screen-top{align-items:center;gap:20px}
+.screen-header-right{display:flex;align-items:center;justify-content:flex-end;gap:20px}
+.screen .brand-with-logo{gap:12px;letter-spacing:normal}
+.screen .onfam-logo{width:82px;height:56px;max-width:none}
+.screen .brand-title{font-size:11px}
+.screen .brand-divider{height:32px}
+.screen .host-theme-toggle{letter-spacing:normal}
+@media(max-width:680px){.screen-top{gap:8px}.screen-header-right{gap:10px}.screen .onfam-logo{width:56px;height:41px}.screen .brand-with-logo{gap:7px}.screen .brand-title{font-size:9px;letter-spacing:.05em}.screen .brand-divider{height:27px}.screen-header-right>span{font-size:10px}}
