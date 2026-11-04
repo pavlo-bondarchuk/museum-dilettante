@@ -39,6 +39,11 @@ function csvRows(text: string): string[][] {
   return rows
 }
 
+const isAllowedAdminEmail = (value: string) => {
+  const email = value.trim().toLowerCase()
+  return email === 'bonddesign85@gmail.com' || /^[^@\s]+@ofam\.ua$/.test(email)
+}
+
 const blank = (deck: number): Editor => ({
   question:'', answer:0, unit:'', deck_id:deck, explanation:'', difficulty:'medium', active:true
 })
@@ -69,6 +74,7 @@ export default function Admin() {
   const [working, setWorking] = useState(false)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
+  const validEmail = isAllowedAdminEmail(email)
 
   useEffect(() => {
     if (!db) { setError('Немає підключення до Supabase.'); setReady(true); return }
@@ -114,8 +120,14 @@ export default function Admin() {
   const deck = decks.find(d => d.id === selected)
   const active = questions.filter(q => q.deck_id === selected && q.active).length
 
+  function validateAdminEmail() {
+    if (validEmail) return true
+    setError('Дозволено лише bonddesign85@gmail.com або адресу з домену @ofam.ua.')
+    return false
+  }
+
   async function sendLink() {
-    if (!db || !email.trim()) return
+    if (!db || !validateAdminEmail()) return
     setWorking(true); setError(''); setNotice('')
     try {
       const { error: err } = await db.auth.signInWithOtp({ email:email.trim(), options: { emailRedirectTo: window.location.origin + '/admin' } })
@@ -148,7 +160,7 @@ export default function Admin() {
   }
 
   async function signInPassword() {
-    if (!db || !email.trim() || !password) return
+    if (!db || !validateAdminEmail() || !password) return
     setWorking(true);setError('');setNotice('')
     try {
       const {error:err}=await db.auth.signInWithPassword({email:email.trim(),password})
@@ -175,7 +187,7 @@ export default function Admin() {
   }
 
   async function verifyCode() {
-    if (!db) return
+    if (!db || !validateAdminEmail()) return
     setWorking(true); setError('')
     try {
       const { error: err } = await db.auth.verifyOtp({ email: email.trim(), token: token.trim(), type:'email' })
@@ -274,9 +286,9 @@ export default function Admin() {
       {notice && <div className="admin-notice">{notice}<button onClick={()=>setNotice('')}><X size={18}/></button></div>}
       {!session ? <section className="admin-card admin-login">
         <h2>Вхід адміністратора</h2>
-        <p>Вхід адміністратора: bonddesign85@gmail.com або підтверджена адреса @ofam.ua.</p>
+        <p>Доступ дозволений виключно для bonddesign85@gmail.com та підтверджених облікових записів @ofam.ua.</p>
         <button className="admin-google-button" disabled={working} onClick={()=>void signInGoogle()}><LogIn size={19} aria-hidden="true"/> Увійти через Google</button>
-        <p className="admin-login-help">Google-вхід не надсилає листи Supabase. Для нього потрібно один раз налаштувати Google OAuth у Supabase. Доступ отримають лише підтверджені адреси з дозволеного домену або головний адміністратор.</p>
+        <p className="admin-login-help">Google-вхід не потребує листів Supabase. Увійдіть саме з головної адреси або корпоративної пошти @ofam.ua.</p>
         <div className="admin-login-separator"><span>Інші способи входу</span></div>
         <div className="admin-login-methods">
           <button className={'admin-button icon-button'+(loginMethod==='password'?' accent':'')} onClick={()=>{setLoginMethod('password');setError('')}}><KeyRound size={16}/> За паролем</button>
@@ -285,10 +297,10 @@ export default function Admin() {
         <label>Електронна пошта<input type="email" autoComplete="username" value={email} onChange={e=>setEmail(e.target.value)} placeholder="email@example.com"/></label>
         {loginMethod==='password' ? <>
           <label>Пароль<input type="password" autoComplete="current-password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="Ваш пароль"/></label>
-          <button className="admin-button accent icon-button" disabled={working||!email.trim()||!password} onClick={()=>void signInPassword()}><KeyRound size={16}/> Увійти</button>
+          <button className="admin-button accent icon-button" disabled={working||!validEmail||!password} onClick={()=>void signInPassword()}><KeyRound size={16}/> Увійти</button>
           <p className="admin-login-help">Якщо ви ще не встановили пароль, скористайтеся входом через пошту. Після підтвердження можна буде створити пароль.</p>
         </> : <>
-          <button disabled={working || !email.trim() || emailLimited} className="admin-button accent icon-button" onClick={()=>void sendLink()}><Mail size={16}/>{sent?'Надіслати ще раз':'Отримати посилання для входу'}</button>
+          <button disabled={working || !validEmail || emailLimited} className="admin-button accent icon-button" onClick={()=>void sendLink()}><Mail size={16}/>{sent?'Надіслати ще раз':'Отримати посилання для входу'}</button>
           {emailLimited && <p className="admin-login-help">Надсилання листів тимчасово обмежене на рівні Supabase. Ліміт спільний для всіх адміністраторів проєкту. Після його відновлення можна повторити спробу.</p>}
           {sent && <div className="admin-code"><label>Код із листа (якщо є)<input value={token} onChange={e=>setToken(e.target.value)} inputMode="numeric" placeholder="6-значний код"/></label><button disabled={working || !token} className="admin-button" onClick={()=>void verifyCode()}>Підтвердити код</button></div>}
         </>}
