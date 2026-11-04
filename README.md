@@ -37,6 +37,20 @@ Realtime-події з відкритої таблиці `game_public` дают�
 
 Колоди на екрані ведучого підтягуються з бази автоматично. Нові й редаговані питання беруть участь у **нових** кімнатах, у вже запущених кімнатах список ID фіксований.
 
+## Вхід без ліміту листів Supabase
+
+Основний варіант: **Google OAuth** (кнопка `Увійти через Google` на `/admin`). Він не використовує вбудовану поштову відправку Supabase і працює з поточною серверною перевіркою підтверджених адрес `@ofam.ua` та головного Gmail. Пошта/пароль залишаються альтернативами.
+
+Перед використанням кнопки **обов'язково** налаштуйте постачальника Google у Supabase:
+1. У [Google Auth Platform](https://console.cloud.google.com/auth/overview) створіть OAuth клієнт **Web application**. Налаштуйте Audience, Branding та scopes `openid`, `email`, `profile`.
+2. Authorized JavaScript origin: `https://museum-dilettante-git-feat-f-722144-bonddesign85-9811s-projects.vercel.app`.
+3. Authorized redirect URI: `https://owrsytlgmiykjiistijk.supabase.co/auth/v1/callback`.
+4. В [Supabase Auth Providers](https://supabase.com/dashboard/project/owrsytlgmiykjiistijk/auth/providers) увімкніть **Google**, вставте Client ID і Client Secret, збережіть. Ніколи не додавайте Client Secret до GitHub або Vite env.
+5. У Supabase Authentication > URL Configuration перевірте, що redirect `https://museum-dilettante-git-feat-f-722144-bonddesign85-9811s-projects.vercel.app/**` дозволено.
+6. Увійдіть через кнопку Google й перевірте читання та редагування з підтвердженим `@ofam.ua`. Якщо корпоративні акаунти музею не керуються Google / не мають Google-входу, цей метод не забезпечить автентифікацію власне корпоративної скриньки — знадобиться OAuth її реального постачальника (наприклад, Microsoft Entra ID).
+
+Google OAuth усуває **саме ліміт відправлення email**; загальні обмеження API й захист від зловживань залишаються.
+
 ## Права адміністратора
 
 Доступ до `/admin` визначається на сервері у функціях `public.is_quiz_admin()` та `public.is_quiz_owner()` із `supabase/domain-admin-access.sql`.
