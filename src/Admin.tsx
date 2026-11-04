@@ -48,6 +48,7 @@ export default function Admin() {
   const [tab,setTab] = useState<'questions'|'punishments'|'admins'>('questions')
   const [ready, setReady] = useState(false)
   const [allowed, setAllowed] = useState(false)
+  const [isOwner, setIsOwner] = useState(false)
   const [email, setEmail] = useState('')
   const [loginMethod,setLoginMethod] = useState<'password'|'email'>('password')
   const [password,setPassword] = useState('')
@@ -91,14 +92,17 @@ export default function Admin() {
 
   useEffect(() => {
     const client = db
-    if (!session || !client) { setAllowed(false); return }
+    if (!session || !client) { setAllowed(false); setIsOwner(false); return }
     let cancelled = false
     const connect = async () => {
       try {
-        const { data, error: err } = await client.rpc('is_quiz_admin')
-        if (err) throw err
+        const [adminResult,ownerResult] = await Promise.all([client.rpc('is_quiz_admin'),client.rpc('is_quiz_owner')])
+        if (adminResult.error) throw adminResult.error
+        if (ownerResult.error) throw ownerResult.error
         if (cancelled) return
+        const data = adminResult.data
         setAllowed(!!data)
+        setIsOwner(!!ownerResult.data)
         if (data) await load()
       } catch(e) { if (!cancelled) setError((e as Error).message) }
     }
@@ -255,7 +259,7 @@ export default function Admin() {
       {notice && <div className="admin-notice">{notice}<button onClick={()=>setNotice('')}><X size={18}/></button></div>}
       {!session ? <section className="admin-card admin-login">
         <h2>Вхід адміністратора</h2>
-        <p>Вхід доступний лише для email, доданих до списку адміністраторів.</p>
+        <p>Вхід адміністратора: bonddesign85@gmail.com або підтверджена адреса @ofam.ua.</p>
         <div className="admin-login-methods">
           <button className={'admin-button icon-button'+(loginMethod==='password'?' accent':'')} onClick={()=>{setLoginMethod('password');setError('')}}><KeyRound size={16}/> За паролем</button>
           <button className={'admin-button icon-button'+(loginMethod==='email'?' accent':'')} onClick={()=>{setLoginMethod('email');setError('')}}><Mail size={16}/> Через пошту</button>
@@ -270,7 +274,7 @@ export default function Admin() {
           {emailLimited && <p className="admin-login-help">Надсилання листів тимчасово обмежене на рівні Supabase. Ліміт спільний для всіх адміністраторів проєкту. Після його відновлення можна повторити спробу.</p>}
           {sent && <div className="admin-code"><label>Код із листа (якщо є)<input value={token} onChange={e=>setToken(e.target.value)} inputMode="numeric" placeholder="6-значний код"/></label><button disabled={working || !token} className="admin-button" onClick={()=>void verifyCode()}>Підтвердити код</button></div>}
         </>}
-      </section> : !allowed ? <section className="admin-card"><h2>Доступ обмежено</h2><p>Ви увійшли, але ця адреса ще не додана до списку адміністраторів. Попросіть чинного адміністратора додати ваш email у вкладці «Адміністратори», після чого оновіть сторінку.</p></section> : <>
+      </section> : !allowed ? <section className="admin-card"><h2>Доступ обмежено</h2><p>Доступ дозволено лише для bonddesign85@gmail.com та підтверджених адрес @ofam.ua. Увійдіть із відповідної пошти.</p></section> : <>
       <section className="admin-password-settings">
         <button className="admin-button icon-button" onClick={()=>{setPasswordOpen(!passwordOpen);setError('')}}><ShieldCheck size={16}/> {passwordOpen?'Закрити налаштування пароля':'Налаштувати пароль для входу'}</button>
         {passwordOpen&&<div className="admin-card admin-password-form">
@@ -281,8 +285,8 @@ export default function Admin() {
           <button className="admin-button accent icon-button" disabled={working||newPassword.length<12||!confirmPassword} onClick={()=>void setAdminPassword()}><Save size={16}/> Зберегти пароль</button>
         </div>}
       </section>
-      <div className="admin-tabs"><button className={tab==='questions'?'active':''} onClick={()=>setTab('questions')}><BookOpen size={16} className="ui-icon"/> Запитання</button><button className={tab==='punishments'?'active':''} onClick={()=>{setTab('punishments');setEditing(null);setNewDeck(false)}}><ListChecks size={16} className="ui-icon"/> Покарання</button><button className={tab==='admins'?'active':''} onClick={()=>{setTab('admins');setEditing(null);setNewDeck(false)}}><UsersRound size={16} className="ui-icon"/> Адміністратори</button></div>
-      {tab==='punishments' ? <Punishments/> : tab==='admins' ? <AdminUsers/> : <>
+      <div className="admin-tabs"><button className={tab==='questions'?'active':''} onClick={()=>setTab('questions')}><BookOpen size={16} className="ui-icon"/> Запитання</button><button className={tab==='punishments'?'active':''} onClick={()=>{setTab('punishments');setEditing(null);setNewDeck(false)}}><ListChecks size={16} className="ui-icon"/> Покарання</button>{isOwner && <button className={tab==='admins'?'active':''} onClick={()=>{setTab('admins');setEditing(null);setNewDeck(false)}}><UsersRound size={16} className="ui-icon"/> Доступи</button>}</div>
+      {tab==='punishments' ? <Punishments/> : tab==='admins' && isOwner ? <AdminUsers/> : <>
       <section className="admin-toolbar"><div className="admin-field"><label>Колода<select value={selected} onChange={e=>{setSelected(Number(e.target.value));setEditing(null)}}>{decks.map(d=><option key={d.id} value={d.id}>{d.name}</option>)}</select></label></div><button className="admin-button" onClick={()=>setNewDeck(true)}><Plus size={16} className="ui-icon"/> Нова колода</button><button className="admin-button accent" onClick={()=>setEditing(blank(selected))} disabled={!selected}><Plus size={16} className="ui-icon"/> Запитання</button></section>
       {deck && <div className="admin-summary"><div><strong>{questions.filter(q=>q.deck_id===selected).length}</strong><span>Усього запитань</span></div><div><strong>{active}</strong><span>Активних</span></div><p>{deck.description}</p></div>}
       <section className="admin-card"><div className="admin-list-bar"><input placeholder="Пошук запитання або числа…" value={search} onChange={e=>setSearch(e.target.value)}/><label className="admin-import"><Upload size={16} className="ui-icon"/> Імпорт CSV <input type="file" accept=".csv,text/csv,text/plain" disabled={working} onChange={async e=>{const f=e.target.files?.[0];if(f) await importCsv(f);e.target.value=''}}/></label><button className="admin-button" onClick={exportCsv} disabled={!questions.length}><Download size={16} className="ui-icon"/> Експорт CSV</button></div><div className="admin-list">{displayed.map(q=><article key={q.id} className={'admin-question'+(!q.active?' inactive':'')}><div className="admin-question-text"><span className="admin-question-id">#{q.id} · {q.difficulty} · {q.active?'Активне':'Вимкнене'}</span><h3>{q.question}</h3><p><strong>{q.answer}</strong> {q.unit}</p>{q.explanation && <small>{q.explanation}</small>}</div><div className="admin-question-actions"><button className="admin-button" onClick={()=>setEditing({...q})}><Pencil size={15} className="ui-icon"/> Редагувати</button><button className="admin-button danger" disabled={working} onClick={()=>void removeQuestion(q)}><Ban size={15} className="ui-icon"/>{q.active?'Вимкнути':'Увімкнути'}</button></div></article>)}{!displayed.length && <p className="admin-empty">У цій колоді немає запитань за вибраним фільтром.</p>}</div></section>
