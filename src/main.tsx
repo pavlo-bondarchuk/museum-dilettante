@@ -1,10 +1,11 @@
-import { ArrowRight, ArrowLeft, ExternalLink, Check, Copy, Play, Monitor, Plus, BookOpen, ChevronDown, UserRound, Sun, Moon } from 'lucide-react'
+import { ArrowRight, ArrowLeft, ExternalLink, Check, Copy, Play, Monitor, Plus, BookOpen, ChevronDown, UserRound } from 'lucide-react'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Link, Route, Routes, useNavigate, useParams } from 'react-router-dom'
 import { QRCodeSVG } from 'qrcode.react'
 import { db } from './supabase'
 import Admin from './Admin'
+import { ThemeProvider, ThemeToggle, MuseumBrand } from './Theme'
 import './style.css'
 
 type Player = { name: string; value?: number; error?: number; points: number; penalties: number; answered: boolean; mine?: boolean; id: string }
@@ -25,8 +26,8 @@ const token = (key: string) => {
   return stored
 }
 
-function Shell({ children, hostTheme, headerAction }: { children: React.ReactNode; hostTheme?: 'dark'|'light'; headerAction?: React.ReactNode }) {
-  return <div className={['shell',hostTheme ? 'host-theme-'+hostTheme : ''].filter(Boolean).join(' ')}><header><Link to="/" className="brand brand-with-logo" aria-label="Музейний дилетант — на головну"><img className="onfam-logo" src="https://cdn.prod.website-files.com/65a126447c08c162c916fa2c/65b24c24460c29664e2a1755_ONFAM-Logo.svg" alt="Логотип Одеського національного художнього музею" decoding="async"/><span className="brand-divider" aria-hidden="true"></span><span className="brand-title">МУЗЕЙНИЙ<br/><b>ДИЛЕТАНТ</b></span></Link><div className="shell-header-right"><span className="eyebrow">ОНХМ · Інтерактивна гра</span>{headerAction}</div></header><main>{children}</main><footer>Музейні історії. Непередбачувані цифри.</footer></div>
+function Shell({ children }: { children: React.ReactNode }) {
+  return <div className="shell"><header><MuseumBrand/><div className="shell-header-right"><span className="eyebrow">ОНХМ · Інтерактивна гра</span><ThemeToggle/></div></header><main>{children}</main><footer>Музейні історії. Непередбачувані цифри.</footer></div>
 }
 
 function Home() {
@@ -55,12 +56,6 @@ function useLive(code: string | undefined, identity: Record<string, unknown>) {
 }
 
 function Host() {
-  const [theme, setTheme] = useState<'light'|'dark'>(() => localStorage.getItem('md-host-theme') === 'light' ? 'light' : 'dark')
-  useEffect(() => {
-    document.body.dataset.hostTheme = theme
-    localStorage.setItem('md-host-theme',theme)
-    return () => { delete document.body.dataset.hostTheme }
-  },[theme])
   const [code, setCode] = useState(localStorage.getItem('md-host-code') || '')
   const [decks, setDecks] = useState<{id:number,name:string,question_count:number}[]>([])
   const [deckId, setDeckId] = useState<number|null>(null)
@@ -76,7 +71,7 @@ function Host() {
     finally { setWorking(false) }
   }
   const link = code ? window.location.origin + '/join/' + code : ''
-  return <Shell hostTheme={theme} headerAction={<button type="button" className="host-theme-toggle" aria-label={theme==='dark'?'Увімкнути світлу тему':'Увімкнути темну тему'} aria-pressed={theme==='light'} title={theme==='dark'?'Світла тема':'Темна тема'} onClick={()=>setTheme(t=>t==='dark'?'light':'dark')}>{theme==='dark'?<Sun size={19} aria-hidden="true"/>:<Moon size={19} aria-hidden="true"/>}<span>{theme==='dark'?'Світла тема':'Темна тема'}</span></button>}><div className="top"><span className="kicker">Пульт ведучого</span><Link to="/admin"><BookOpen className="ui-icon" size={16}/> Банк запитань</Link></div>{!code ? <section className="panel center"><h1>Створити гру</h1><p>Одна кімната, одна QR-адреса, до 40 учасників.</p><label className="host-deck-field"><span className="host-deck-label">Колода запитань</span><span className="host-select-wrap"><select className="host-deck-select" value={deckId ?? ""} onChange={e=>setDeckId(Number(e.target.value))} disabled={!decks.length}>{!decks.length && <option value="">Завантаження колод…</option>}{decks.map(d=><option key={d.id} value={d.id}>{d.name} · {d.question_count} запитань</option>)}</select><ChevronDown className="host-select-icon" size={20} aria-hidden="true"/></span></label><button className="btn primary icon-button" disabled={working || !deckId} onClick={() => void act('create')}><Plus className="ui-icon" size={16}/> Створити кімнату</button></section> : <>
+  return <Shell><div className="top"><span className="kicker">Пульт ведучого</span><Link to="/admin"><BookOpen className="ui-icon" size={16}/> Банк запитань</Link></div>{!code ? <section className="panel center"><h1>Створити гру</h1><p>Одна кімната, одна QR-адреса, до 40 учасників.</p><label className="host-deck-field"><span className="host-deck-label">Колода запитань</span><span className="host-select-wrap"><select className="host-deck-select" value={deckId ?? ""} onChange={e=>setDeckId(Number(e.target.value))} disabled={!decks.length}>{!decks.length && <option value="">Завантаження колод…</option>}{decks.map(d=><option key={d.id} value={d.id}>{d.name} · {d.question_count} запитань</option>)}</select><ChevronDown className="host-select-icon" size={20} aria-hidden="true"/></span></label><button className="btn primary icon-button" disabled={working || !deckId} onClick={() => void act('create')}><Plus className="ui-icon" size={16}/> Створити кімнату</button></section> : <>
     <div className="host-grid"><section className="panel"><span className="kicker">Кімната</span><h1 className="room-code">{code}</h1><div className="qr">{link && <QRCodeSVG value={link} size={176} bgColor="#ffffff" fgColor="#171b25" marginSize={2}/>}</div><a href={link} target="_blank" rel="noreferrer">{link}</a><div className="actions"><Link className="btn outline icon-button" to={'/screen/' + code} target="_blank"><Monitor className="ui-icon" size={17}/> Відкрити екран проектора <ExternalLink className="ui-icon" size={15}/></Link><button className="btn subtle icon-button" onClick={() => void navigator.clipboard.writeText(link)}><Copy className="ui-icon" size={16}/> Скопіювати посилання</button></div></section>
     <section className="panel"><span className="kicker">{snap ? 'Раунд ' + (snap.round + 1) + ' / ' + snap.total : 'Очікування'}</span><h2>{snap?.question || 'Збираємо учасників'}</h2><p>Підключено: <b>{snap?.players.length || 0}</b> · Відповіло: <b>{snap?.answered || 0}</b></p><p>Стан: <b>{snap?.status || 'завантаження'}</b></p>{snap?.status === 'reveal' && <div className="result"><div>Правильна відповідь: <strong>{snap.correct} {snap.unit}</strong></div><div>Музейний вирок: <strong>{snap.loser || 'Немає'}</strong></div><p>{snap.punishment}</p>{snap.explanation && <p>{snap.explanation}</p>}</div>}
     <div className="actions">{snap?.status === 'lobby' && <button className="btn primary icon-button" disabled={working || !snap.players.length} onClick={() => void act('start')}><Play className="ui-icon" size={16}/> Почати гру</button>}{snap?.status === 'answer' && <button className="btn primary icon-button" disabled={working} onClick={() => void act('reveal')}>Закрити відповіді й показати результат</button>}{snap?.status === 'reveal' && <button className="btn primary icon-button" disabled={working} onClick={() => void act('next')}>Наступне питання <ArrowRight className="ui-icon" size={17}/></button>}{snap?.status === 'finished' && <p>Гру завершено. Дякуємо за участь!</p>}</div></section></div>
@@ -117,7 +112,7 @@ function Join() {
 function Screen() {
   const { code } = useParams()
   const { snap, error } = useLive(code?.toUpperCase(), {})
-  return <div className="screen"><div className="screen-top"><span>МУЗЕЙНИЙ ДИЛЕТАНТ</span><span>КІМНАТА {code?.toUpperCase()}</span></div>{!snap ? <h1>{error || 'Завантажуємо гру…'}</h1> : snap.status === 'lobby' ? <div className="screen-center"><span className="kicker">Скануйте QR, щоб приєднатися</span><div className="screen-qr"><QRCodeSVG value={window.location.origin + '/join/' + snap.code} size={230} marginSize={2}/></div><h1>{snap.code}</h1><p>У грі вже {snap.players.length} учасників</p></div> : snap.status === 'answer' ? <div className="screen-center"><span className="kicker">Раунд {snap.round + 1} із {snap.total}</span><h1>{snap.question}</h1><p>Відповіли {snap.answered} / {snap.players.length}</p></div> : snap.status === 'reveal' ? <div className="screen-center"><span className="kicker">Правильна відповідь</span><div className="big-answer">{snap.correct} <small>{snap.unit}</small></div>{snap.explanation && <p className="screen-explanation">{snap.explanation}</p>}<div className="scoreboard">{snap.players.map(p => <div className="score-row" key={p.id}><b>{p.name}</b><span>{p.value ?? '—'}</span><span>{p.error == null ? '—' : '±' + p.error}</span></div>)}</div>{snap.loser && <div className="verdict"><span>МУЗЕЙНИЙ ВИРОК · {snap.loser}</span><h2>{snap.punishment}</h2></div>}</div> : <div className="screen-center"><h1>Дякуємо за гру!</h1><div className="scoreboard">{snap.players.map(p => <div className="score-row" key={p.id}><b>{p.name}</b><span>{p.points} балів</span><span>{p.penalties} покарань</span></div>)}</div></div>}<div className="screen-foot">Історія музею ближча, ніж здається</div></div>
+  return <div className="screen"><div className="screen-top"><MuseumBrand compact/><div className="screen-header-right"><span>КІМНАТА {code?.toUpperCase()}</span><ThemeToggle/></div></div>{!snap ? <h1>{error || 'Завантажуємо гру…'}</h1> : snap.status === 'lobby' ? <div className="screen-center"><span className="kicker">Скануйте QR, щоб приєднатися</span><div className="screen-qr"><QRCodeSVG value={window.location.origin + '/join/' + snap.code} size={230} marginSize={2}/></div><h1>{snap.code}</h1><p>У грі вже {snap.players.length} учасників</p></div> : snap.status === 'answer' ? <div className="screen-center"><span className="kicker">Раунд {snap.round + 1} із {snap.total}</span><h1>{snap.question}</h1><p>Відповіли {snap.answered} / {snap.players.length}</p></div> : snap.status === 'reveal' ? <div className="screen-center"><span className="kicker">Правильна відповідь</span><div className="big-answer">{snap.correct} <small>{snap.unit}</small></div>{snap.explanation && <p className="screen-explanation">{snap.explanation}</p>}<div className="scoreboard">{snap.players.map(p => <div className="score-row" key={p.id}><b>{p.name}</b><span>{p.value ?? '—'}</span><span>{p.error == null ? '—' : '±' + p.error}</span></div>)}</div>{snap.loser && <div className="verdict"><span>МУЗЕЙНИЙ ВИРОК · {snap.loser}</span><h2>{snap.punishment}</h2></div>}</div> : <div className="screen-center"><h1>Дякуємо за гру!</h1><div className="scoreboard">{snap.players.map(p => <div className="score-row" key={p.id}><b>{p.name}</b><span>{p.points} балів</span><span>{p.penalties} покарань</span></div>)}</div></div>}<div className="screen-foot">Історія музею ближча, ніж здається</div></div>
 }
 
 function App() {
@@ -132,4 +127,4 @@ function App() {
   </Routes>
 }
 
-createRoot(document.getElementById('root')!).render(<BrowserRouter><App/></BrowserRouter>)
+createRoot(document.getElementById('root')!).render(<BrowserRouter><ThemeProvider><App/></ThemeProvider></BrowserRouter>)
