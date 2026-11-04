@@ -22,3 +22,17 @@
 .ui-icon{display:inline-block;vertical-align:middle;flex:none}
 .icon-button{display:inline-flex;align-items:center;justify-content:center;gap:8px}
 @media(max-width:900px){.penalty-modes{grid-template-columns:1fr}.admin-shell label.penalty-mode{min-height:0}}
+
+.admin-users-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:18px}
+.admin-users-heading h2{display:flex;align-items:center;gap:12px}
+.admin-users-form{margin:24px 0 30px}
+.admin-users-field{display:flex;gap:12px;align-items:center}
+.admin-users-input{display:flex;align-items:center;flex:1;gap:12px;min-width:0;border:1px solid #5b6069;border-radius:8px;background:#151922;padding:0 14px}
+.admin-users-input svg{flex:none;color:#dbbb7f}
+.admin-shell .admin-users-input input[type=email]{flex:1;min-width:0;border:none;background:transparent;margin:0;padding:15px 0;outline:none;box-shadow:none}
+.admin-users-list h3{font-size:15px;color:#d4ba8d;margin:0 0 10px}
+.admin-users-row{display:flex;justify-content:space-between;align-items:center;gap:12px;border-top:1px solid #424750;padding:15px 0}
+.admin-users-identity{display:flex;align-items:center;gap:10px;min-width:0;overflow-wrap:anywhere}
+.admin-users-identity svg{flex:none;color:#d4ba8d}
+.admin-users-hint{font-size:13px;line-height:1.65;margin:26px 0 0}
+@media(max-width:680px){.admin-users-heading,.admin-users-field{flex-direction:column;align-items:stretch}.admin-users-row{flex-wrap:wrap}.admin-users-input{width:100%}}
