@@ -52,3 +52,41 @@
 .admin-google-button:disabled{opacity:.55;cursor:wait}
 .admin-login-separator{display:flex;align-items:center;gap:14px;color:#aeb4bf;font-size:12px;margin:24px 0 16px}
 .admin-login-separator:before,.admin-login-separator:after{content:"";height:1px;flex:1;background:#515561}
+
+.admin-bar .brand-with-logo{font-family:inherit;font-size:inherit;gap:14px}
+.admin-bar .onfam-logo{width:85px;height:58px;max-width:none}
+.admin-bar .brand-title{font:700 12px/1.35 system-ui,sans-serif;letter-spacing:.12em}
+.admin-bar .brand-divider{height:32px}
+html[data-theme="light"] .admin-shell{background:#f6f3ec;color:#252a35}
+html[data-theme="light"] .admin-bar{border-color:#d3cbc0}
+html[data-theme="light"] .admin-bar a:not(.brand){color:#755323}
+html[data-theme="light"] .admin-heading p,html[data-theme="light"] .admin-card p,html[data-theme="light"] .admin-summary p{color:#555967}
+html[data-theme="light"] .admin-card,html[data-theme="light"] .admin-dialog{background:#fffefa;color:#252a35;border-color:#d5cec3;box-shadow:0 5px 28px rgba(29,35,44,.055)}
+html[data-theme="light"] .admin-shell label{color:#785522}
+html[data-theme="light"] .admin-shell input:not([type=checkbox]):not([type=radio]):not([type=file]),html[data-theme="light"] .admin-shell textarea,html[data-theme="light"] .admin-shell select{background:#fffefa;color:#242935;border-color:#b8aea0}
+html[data-theme="light"] .admin-shell input::placeholder,html[data-theme="light"] .admin-shell textarea::placeholder{color:#7d7e83}
+html[data-theme="light"] .admin-button,html[data-theme="light"] .admin-import{background:#eeebe5;border-color:#b9b0a5;color:#2e3440}
+html[data-theme="light"] .admin-button.accent{background:#bc9355;color:#1d2630;border-color:#bc9355}
+html[data-theme="light"] .admin-button.danger{color:#a02e44;border-color:#ce9eaa}
+html[data-theme="light"] .admin-tabs button{background:#fffefa;border-color:#bab1a4;color:#343940}
+html[data-theme="light"] .admin-tabs button.active{background:#bc9355;color:#202530;border-color:#bc9355}
+html[data-theme="light"] .admin-question,html[data-theme="light"] .admin-users-row{border-color:#d5cec4}
+html[data-theme="light"] .admin-question p{color:#795322}
+html[data-theme="light"] .admin-question small,html[data-theme="light"] .admin-question-id{color:#666d79}
+html[data-theme="light"] .admin-summary strong{color:#865c29}
+html[data-theme="light"] .admin-summary span,html[data-theme="light"] .admin-users-hint{color:#5a6070}
+html[data-theme="light"] .admin-shell .admin-check{color:#303741}
+html[data-theme="light"] .admin-alert{background:#f6dfe2;color:#7d283c}
+html[data-theme="light"] .admin-notice{background:#def1e4;color:#225839}
+html[data-theme="light"] .admin-overlay{background:#1015219c}
+html[data-theme="light"] .penalty-mode{background:#fffefa;border-color:#bcb0a4;color:#343843!important}
+html[data-theme="light"] .penalty-mode.selected{background:#f3e8d7;border-color:#9f793f}
+html[data-theme="light"] .penalty-mode strong{color:#252b35}
+html[data-theme="light"] .penalty-mode small{color:#555b66}
+html[data-theme="light"] .penalty-help{color:#585d68}
+html[data-theme="light"] .admin-users-input{background:#fffefa;border-color:#b8aea0}
+html[data-theme="light"] .admin-users-input svg,html[data-theme="light"] .admin-users-identity svg{color:#815b28}
+html[data-theme="light"] .admin-google-button{background:#fff;border-color:#b7bfc8;color:#29323e}
+html[data-theme="light"] .admin-login-separator{color:#666f77}
+html[data-theme="light"] .admin-login-separator:before,html[data-theme="light"] .admin-login-separator:after{background:#d2cbc3}
+@media(max-width:680px){.admin-bar .onfam-logo{width:64px;height:44px}.admin-bar .brand-title{font-size:10px}.admin-bar .brand-with-logo{gap:8px}.admin-bar .brand-divider{height:26px}.admin-bar .admin-actions{gap:8px}}
