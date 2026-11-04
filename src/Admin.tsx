@@ -6,6 +6,7 @@ import { db } from './supabase'
 import Punishments from './Punishments'
 import AdminUsers from './AdminUsers'
 import './admin.css'
+import { MuseumBrand, ThemeToggle } from './Theme'
 
 type Deck = { id: number; name: string; slug: string; description: string }
 type Question = { id: number; question: string; answer: number; unit: string; deck_id: number; explanation: string; difficulty: string; active: boolean }
@@ -202,7 +203,7 @@ export default function Admin() {
 
   if (!ready) return <div className="admin-shell"><p>Завантаження адміністратора…</p></div>
   return <div className="admin-shell">
-    <header className="admin-bar"><Link to="/" className="admin-brand">М <span>МУЗЕЙНИЙ ДИЛЕТАНТ</span></Link><div className="admin-actions"><Link to="/host">Пульт ведучого</Link>{session && <button className="admin-button quiet" onClick={() => void db?.auth.signOut()}><LogOut size={15} className="ui-icon"/> Вийти</button>}</div></header>
+    <header className="admin-bar"><MuseumBrand compact/><div className="admin-actions"><ThemeToggle/><Link to="/host">Пульт ведучого</Link>{session && <button className="admin-button quiet" onClick={() => void db?.auth.signOut()}><LogOut size={15} className="ui-icon"/> Вийти</button>}</div></header>
     <main className="admin-main">
       <div className="admin-heading"><div><span className="kicker">Адміністрування</span><h1>Музейна гра · налаштування</h1><p>Керуйте запитаннями, покараннями та правилами їхнього вибору без змін у коді.</p></div></div>
       {error && <div role="alert" className="admin-alert">{error}<button onClick={()=>setError('')}><X size={18}/></button></div>}
