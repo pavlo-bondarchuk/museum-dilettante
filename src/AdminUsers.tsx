@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import type { FormEvent } from 'react'
 import { UserRoundPlus, Trash2, ShieldCheck, Mail, RefreshCw } from 'lucide-react'
 import { db } from './supabase'
 
@@ -21,7 +22,7 @@ export default function AdminUsers() {
     void change('list').catch(e=>setError((e as Error).message)).finally(()=>setLoaded(true))
   },[change])
 
-  async function submit(e: React.FormEvent) {
+  async function submit(e: FormEvent) {
     e.preventDefault()
     if (!email.trim()) return
     setBusy(true);setError('');setNotice('')
