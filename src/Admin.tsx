@@ -114,7 +114,7 @@ export default function Admin() {
     if (!db || !email.trim()) return
     setWorking(true); setError(''); setNotice('')
     try {
-      const { error: err } = await db.auth.signInWithOtp({ email:email.trim(), options: { emailRedirectTo: window.location.origin + '/admin', shouldCreateUser:false } })
+      const { error: err } = await db.auth.signInWithOtp({ email:email.trim(), options: { emailRedirectTo: window.location.origin + '/admin' } })
       if (err) throw err
       setSent(true)
       setNotice('Лист надіслано. Відкрийте посилання з пошти на цьому пристрої або введіть код, якщо він є в листі.')
